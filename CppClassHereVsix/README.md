@@ -1,33 +1,37 @@
 ﻿# Add C++ Class Here
 
-Visual Studio 2022 VSIX that adds `Add C++ Class Here...` to Solution Explorer for `vcxproj` projects.
+`vcxproj` 프로젝트용 Visual Studio 2022 VSIX 확장이다.
 
-## Behavior
+이 확장은 솔루션 탐색기에서 선택한 위치를 기준으로 C++ 클래스를 생성할 수 있게 해준다. 실제 폴더를 선택하면 그 폴더에 파일이 생성되고, VC 필터를 선택한 경우에는 해석된 대상 위치에 파일을 만든 뒤 프로젝트에 바로 추가한다.
 
-- Physical folders: opens `Add New Item` scoped to the selected folder.
-- VC filters: opens `Add New Item` and falls back to the project root.
-- Project root: opens `Add New Item` at the project root.
-- Files and non-`vcxproj` projects: command stays hidden.
+## 동작 방식
 
-## Build
+- 실제 폴더: 선택한 폴더에 파일 생성 후 프로젝트에 추가
+- VC 필터: 대상 위치를 해석해 파일 생성 후 프로젝트에 추가
+- 프로젝트 루트: 프로젝트 기준 위치에 파일 생성
+- 지원하지 않는 선택 상태: 명령이 동작하지 않음
 
-Use the Visual Studio 2022 MSBuild that ships with the installed SDK:
+## 빌드
+
+설치된 Visual Studio 2022의 MSBuild로 빌드한다.
 
 ```powershell
 & "C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe" .\CppClassHereVsix\CppClassHereVsix.csproj /p:Configuration=Release /p:Platform=AnyCPU /t:Build /m:1 /nologo /v:minimal
 ```
 
-The VSIX output is expected at `CppClassHereVsix\bin\Release\CppClassHereVsix.vsix`.
+출력 VSIX:
 
-## Install
+- `CppClassHereVsix\bin\Release\CppClassHereVsix.vsix`
 
-1. Build the project in `Release`.
-2. Double-click the generated `.vsix` or install it from `Extensions -> Manage Extensions`.
-3. Restart Visual Studio.
+## 설치
 
-## Usage
+1. `Release`로 빌드한다.
+2. 생성된 `.vsix` 파일을 설치한다.
+3. Visual Studio를 다시 실행한다.
 
-1. In Solution Explorer, right-click a C++ project node, physical folder, or VC filter.
-2. Choose `Add C++ Class Here...`.
-3. Pick `C++ Class Pair` in the `Add New Item` dialog if it is not already selected.
-4. Enter the class name and confirm.
+## 사용 방법
+
+1. 솔루션 탐색기에서 C++ 프로젝트, 실제 폴더, 또는 VC 필터를 우클릭한다.
+2. `Add C++ Class Here...`를 선택한다.
+3. 다이얼로그에서 클래스 이름, 파일명, 기본 클래스 등을 입력한다.
+4. 확인하면 선택한 위치 기준으로 파일이 생성되고 프로젝트에 추가된다.
