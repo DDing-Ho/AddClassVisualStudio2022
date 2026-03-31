@@ -45,3 +45,21 @@ Output:
 2. Choose `Add C++ Class Here...`.
 3. Enter the class information in the custom dialog.
 4. Confirm to generate the files and add them to the project.
+
+## Release
+
+Current release package:
+
+- `CppClassHereVsix\bin\Release\CppClassHereVsix-1.3.2.vsix`
+
+Recommended release flow:
+
+1. Build `Release`.
+2. Verify the generated VSIX installs correctly in Visual Studio 2022.
+3. Tag the commit for the release version.
+4. Upload the `.vsix` file to your Git hosting release page or internal distribution channel.
+
+## Git
+
+- Default branch: `main`
+- Repository root: `AddClassVisualStudio2022`
