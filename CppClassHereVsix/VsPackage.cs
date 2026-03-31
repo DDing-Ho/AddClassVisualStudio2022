@@ -15,14 +15,14 @@ namespace CppClassHereVsix
         public const string PackageGuidString = "f0434c21-891e-4dd4-b097-ce71dda1cd08";
         private static readonly string LogPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CppClassHereVsix.Package.log");
 
-        protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
+        protected override Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
             try
             {
                 AppendLog("InitializeAsync start");
-                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                await AddCppClassHereCommand.InitializeAsync(this);
+                ThreadHelper.Generic.Invoke(() => AddCppClassHereCommand.Initialize(this));
                 AppendLog("InitializeAsync success");
+                return Task.CompletedTask;
             }
             catch (Exception ex)
             {
@@ -43,4 +43,3 @@ namespace CppClassHereVsix
         }
     }
 }
-

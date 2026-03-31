@@ -73,33 +73,7 @@
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="$(TargetDir)Microsoft.VisualStudio.Threading.dll">
-      <IncludeInVSIX>true</IncludeInVSIX>
-      <Link>Microsoft.VisualStudio.Threading.dll</Link>
-    </Content>
-    <Content Include="$(TargetDir)Microsoft.VisualStudio.Validation.dll">
-      <IncludeInVSIX>true</IncludeInVSIX>
-      <Link>Microsoft.VisualStudio.Validation.dll</Link>
-    </Content>
-    <Content Include="$(TargetDir)Microsoft.Bcl.AsyncInterfaces.dll">
-      <IncludeInVSIX>true</IncludeInVSIX>
-      <Link>Microsoft.Bcl.AsyncInterfaces.dll</Link>
-    </Content>
-    <Content Include="$(TargetDir)System.Memory.dll">
-      <IncludeInVSIX>true</IncludeInVSIX>
-      <Link>System.Memory.dll</Link>
-    </Content>
-    <Content Include="$(TargetDir)System.Runtime.CompilerServices.Unsafe.dll">
-      <IncludeInVSIX>true</IncludeInVSIX>
-      <Link>System.Runtime.CompilerServices.Unsafe.dll</Link>
-    </Content>
-    <Content Include="$(TargetDir)System.Threading.Tasks.Extensions.dll">
-      <IncludeInVSIX>true</IncludeInVSIX>
-      <Link>System.Threading.Tasks.Extensions.dll</Link>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
+<ItemGroup>
     <EmbeddedResource Include="VSPackage.resx">
       <SubType>Designer</SubType>
       <MergeWithCTO>true</MergeWithCTO>
@@ -129,10 +103,6 @@
       <HintPath>$(VsPublicAssembliesPath)Microsoft.VisualStudio.Shell.Interop.dll</HintPath>
       <Private>true</Private>
     </Reference>
-    <Reference Include="Microsoft.VisualStudio.Threading">
-      <HintPath>$(VsSdkAssembliesPath)Microsoft.VisualStudio.Threading.dll</HintPath>
-      <Private>true</Private>
-    </Reference>
     <Reference Include="Microsoft.VisualStudio.Utilities">
       <HintPath>$(VsIdePath)Microsoft.VisualStudio.Utilities.dll</HintPath>
       <Private>true</Private>
@@ -157,6 +127,7 @@
     <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(ProjectDir)SyncVsixManifest.ps1&quot; &quot;$(TargetDir)$(TargetName).vsix&quot; &quot;$(ProjectDir)source.extension.vsixmanifest&quot; &quot;$(TargetDir)extension.vsixmanifest&quot;" />
   </Target>
 </Project>
+
 
 
 

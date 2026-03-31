@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 
 namespace CppClassHereVsix
 {
@@ -28,13 +29,11 @@ namespace CppClassHereVsix
             commandService.AddCommand(CreateCommand(ToolsCommandId));
         }
 
-        public static async System.Threading.Tasks.Task InitializeAsync(AsyncPackage package)
+        public static void Initialize(AsyncPackage package)
         {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            ThreadHelper.ThrowIfNotOnUIThread();
 
-            OleMenuCommandService commandService =
-                await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
-
+            OleMenuCommandService commandService = ((IServiceProvider)package).GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
             if (commandService == null)
             {
                 throw new InvalidOperationException("OleMenuCommandService를 가져올 수 없습니다.");
@@ -67,8 +66,7 @@ namespace CppClassHereVsix
             {
                 AppendLog("Execute start. Assembly=" + Assembly.GetExecutingAssembly().GetName().Version);
 
-                Microsoft.VisualStudio.Shell.Interop.IVsMonitorSelection selectionService = ThreadHelper.JoinableTaskFactory.Run(
-                    async () => await this.package.GetServiceAsync(typeof(Microsoft.VisualStudio.Shell.Interop.SVsShellMonitorSelection)) as Microsoft.VisualStudio.Shell.Interop.IVsMonitorSelection);
+                IVsMonitorSelection selectionService = ((IServiceProvider)this.package).GetService(typeof(SVsShellMonitorSelection)) as IVsMonitorSelection;
                 AppendLog("Selection service acquired: " + (selectionService != null));
 
                 ProjectSelectionContext context = ProjectSelectionContext.TryCreate(selectionService);
