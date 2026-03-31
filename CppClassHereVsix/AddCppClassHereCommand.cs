@@ -30,7 +30,7 @@ namespace CppClassHereVsix
 
         public static async System.Threading.Tasks.Task InitializeAsync(AsyncPackage package)
         {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
             OleMenuCommandService commandService =
                 await package.GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
@@ -233,3 +233,4 @@ namespace CppClassHereVsix
         }
     }
 }
+

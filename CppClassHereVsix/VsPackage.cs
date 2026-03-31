@@ -20,7 +20,7 @@ namespace CppClassHereVsix
             try
             {
                 AppendLog("InitializeAsync start");
-                await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 await AddCppClassHereCommand.InitializeAsync(this);
                 AppendLog("InitializeAsync success");
             }
@@ -43,3 +43,4 @@ namespace CppClassHereVsix
         }
     }
 }
+
