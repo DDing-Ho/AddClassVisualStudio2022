@@ -199,12 +199,12 @@ Visual Studio UI 언어를 따라 아래 항목이 한국어/영어로 바뀝니
 
 빌드 없이 바로 설치하려면 아래 파일을 실행하면 됩니다.
 
-- `Installer\CppClassHereVsix-1.3.6.vsix`
+- `Installer\CppClassHereVsix-1.3.7.vsix`
 
 설치 순서:
 
 1. Visual Studio 2022를 종료합니다.
-2. `Installer\CppClassHereVsix-1.3.6.vsix`를 실행합니다.
+2. `Installer\CppClassHereVsix-1.3.7.vsix`를 실행합니다.
 3. 설치가 끝나면 Visual Studio를 다시 실행합니다.
 
 ## 저장소에서 무엇을 보면 되나요?
@@ -225,7 +225,8 @@ Visual Studio UI 언어를 따라 아래 항목이 한국어/영어로 바뀝니
 빌드 결과는 보통 아래 경로에 생성됩니다.
 
 - `CppClassHereVsix\bin\Release\CppClassHereVsix.vsix`
-- `CppClassHereVsix\bin\Release\CppClassHereVsix-1.3.6.vsix`
+- `CppClassHereVsix\bin\Release\CppClassHereVsix-1.3.7.vsix`
+
 
 
 

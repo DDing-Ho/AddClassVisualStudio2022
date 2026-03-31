@@ -18,9 +18,9 @@ namespace CppClassHereVsix
         private static readonly string LogPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CppClassHereVsix.log");
         private static readonly Regex ValidClassNamePattern = new Regex("^[A-Za-z_][A-Za-z0-9_]*$", RegexOptions.Compiled);
 
-        private readonly AsyncPackage package;
+        private readonly Package package;
 
-        private AddCppClassHereCommand(AsyncPackage package, OleMenuCommandService commandService)
+        private AddCppClassHereCommand(Package package, OleMenuCommandService commandService)
         {
             this.package = package ?? throw new ArgumentNullException(nameof(package));
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
@@ -29,7 +29,7 @@ namespace CppClassHereVsix
             commandService.AddCommand(CreateCommand(ToolsCommandId));
         }
 
-        public static void Initialize(AsyncPackage package)
+        public static void Initialize(Package package)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -66,7 +66,7 @@ namespace CppClassHereVsix
             {
                 AppendLog("Execute start. Assembly=" + Assembly.GetExecutingAssembly().GetName().Version);
 
-                IVsMonitorSelection selectionService = ((IServiceProvider)this.package).GetService(typeof(SVsShellMonitorSelection)) as IVsMonitorSelection;
+                IVsMonitorSelection selectionService = ((IServiceProvider)package).GetService(typeof(SVsShellMonitorSelection)) as IVsMonitorSelection;
                 AppendLog("Selection service acquired: " + (selectionService != null));
 
                 ProjectSelectionContext context = ProjectSelectionContext.TryCreate(selectionService);
@@ -126,7 +126,7 @@ namespace CppClassHereVsix
                 }
 
                 AppendLog("Files added to project.");
-                VsShellUtilities.OpenDocument(this.package, headerPath);
+                VsShellUtilities.OpenDocument(package, headerPath);
                 AppendLog("Header document opened.");
             }
             catch (Exception ex)

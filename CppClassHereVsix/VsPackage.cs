@@ -1,32 +1,29 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.Shell;
 
 namespace CppClassHereVsix
 {
-    [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
+    [PackageRegistration(UseManagedResourcesOnly = true)]
     [ProvideMenuResource("Menus.CTMENU", 1)]
     [Guid(PackageGuidString)]
-    public sealed class VsPackage : AsyncPackage
+    public sealed class VsPackage : Package
     {
         public const string PackageGuidString = "f0434c21-891e-4dd4-b097-ce71dda1cd08";
         private static readonly string LogPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CppClassHereVsix.Package.log");
 
-        protected override Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
+        protected override void Initialize()
         {
             try
             {
-                AppendLog("InitializeAsync start");
-                ThreadHelper.Generic.Invoke(() => AddCppClassHereCommand.Initialize(this));
-                AppendLog("InitializeAsync success");
-                return Task.CompletedTask;
+                AppendLog("Initialize start");
+                AddCppClassHereCommand.Initialize(this);
+                AppendLog("Initialize success");
             }
             catch (Exception ex)
             {
-                AppendLog("InitializeAsync failure: " + ex);
+                AppendLog("Initialize failure: " + ex);
                 throw;
             }
         }
