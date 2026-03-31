@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable">
+  <Extern href="stdidcmd.h" />
+  <Extern href="vsshlids.h" />
+
+  <Commands package="guidCppClassHereVsixPackage">
+    <Groups>
+      <Group guid="guidCppClassHereVsixCmdSet" id="ProjectItemContextGroup" priority="0x0600">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_ITEMNODE" />
+      </Group>
+      <Group guid="guidCppClassHereVsixCmdSet" id="ToolsMenuGroup" priority="0x7000">
+        <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
+      </Group>
+    </Groups>
+
+    <Buttons>
+      <Button guid="guidCppClassHereVsixCmdSet" id="cmdidAddCppClassHere" priority="0x0100" type="Button">
+        <Parent guid="guidCppClassHereVsixCmdSet" id="ProjectItemContextGroup" />
+        <Strings>
+          <ButtonText>Add C++ Class Here...</ButtonText>
+        </Strings>
+      </Button>
+    </Buttons>
+  </Commands>
+
+  <CommandPlacements>
+    <CommandPlacement guid="guidCppClassHereVsixCmdSet" id="ProjectItemContextGroup" priority="0x0600">
+      <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_PROJNODE" />
+    </CommandPlacement>
+    <CommandPlacement guid="guidCppClassHereVsixCmdSet" id="ProjectItemContextGroup" priority="0x0600">
+      <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_FOLDERNODE" />
+    </CommandPlacement>
+    <CommandPlacement guid="guidCppClassHereVsixCmdSet" id="ProjectItemContextGroup" priority="0x0600">
+      <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_XPROJ_PROJITEM" />
+    </CommandPlacement>
+    <CommandPlacement guid="guidCppClassHereVsixCmdSet" id="ProjectItemContextGroup" priority="0x0600">
+      <Parent guid="guidSHLMainMenu" id="IDM_VS_CTXT_XPROJ_SLNPROJ" />
+    </CommandPlacement>
+    <CommandPlacement guid="guidCppClassHereVsixCmdSet" id="cmdidAddCppClassHere" priority="0x0100">
+      <Parent guid="guidCppClassHereVsixCmdSet" id="ToolsMenuGroup" />
+    </CommandPlacement>
+  </CommandPlacements>
+
+  <Symbols>
+    <GuidSymbol name="guidCppClassHereVsixPackage" value="{F0434C21-891E-4DD4-B097-CE71DDA1CD08}" />
+    <GuidSymbol name="guidCppClassHereVsixCmdSet" value="{5DB1127E-437E-4997-8553-FA1B59866FD9}">
+      <IDSymbol name="ProjectItemContextGroup" value="0x1020" />
+      <IDSymbol name="ToolsMenuGroup" value="0x1021" />
+      <IDSymbol name="cmdidAddCppClassHere" value="0x0100" />
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>

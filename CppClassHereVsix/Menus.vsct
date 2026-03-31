@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable">
+  <Extern href="stdidcmd.h" />
+  <Extern href="vsshlids.h" />
+
+  <Commands package="guidCppClassHereVsixPackage">
+    <Buttons>
+      <Button guid="guidCppClassHereVsixCmdSet" id="cmdidAddCppClassHereContext" priority="0x0600" type="Button">
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_PROJECT_ADD_MISC" />
+        <Strings>
+          <ButtonText>Add C++ Class Here...</ButtonText>
+        </Strings>
+      </Button>
+      <Button guid="guidCppClassHereVsixCmdSet" id="cmdidAddCppClassHereTools" priority="0x0100" type="Button">
+        <Parent guid="guidSHLMainMenu" id="IDG_VS_MM_TOOLSADDINS" />
+        <Strings>
+          <ButtonText>Add C++ Class Here...</ButtonText>
+        </Strings>
+      </Button>
+    </Buttons>
+  </Commands>
+
+  <CommandPlacements>
+    <CommandPlacement guid="guidCppClassHereVsixCmdSet" id="cmdidAddCppClassHereContext" priority="0x0600">
+      <Parent guid="guidSHLMainMenu" id="IDG_VS_CTXT_FOLDER_ADD" />
+    </CommandPlacement>
+  </CommandPlacements>
+
+  <Symbols>
+    <GuidSymbol name="guidCppClassHereVsixPackage" value="{F0434C21-891E-4DD4-B097-CE71DDA1CD08}" />
+    <GuidSymbol name="guidCppClassHereVsixCmdSet" value="{5DB1127E-437E-4997-8553-FA1B59866FD9}">
+      <IDSymbol name="cmdidAddCppClassHereContext" value="0x0100" />
+      <IDSymbol name="cmdidAddCppClassHereTools" value="0x0101" />
+    </GuidSymbol>
+  </Symbols>
+</CommandTable>

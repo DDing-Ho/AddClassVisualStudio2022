@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" Type="Item" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005">
+  <TemplateData>
+    <Name>C++ Class Pair</Name>
+    <Description>Creates a matching .h and .cpp pair with a minimal C++ class skeleton.</Description>
+    <TemplateID>CppClassHereVsix.CppClassPair</TemplateID>
+    <ProjectType>VC</ProjectType>
+    <TemplateGroupID>VC-Native</TemplateGroupID>
+    <DefaultName>Class</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+    <LocationField>Enabled</LocationField>
+    <SortOrder>5</SortOrder>
+    <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
+  </TemplateData>
+  <TemplateContent>
+    <ProjectItem ReplaceParameters="true" TargetFileName="$safeitemname$.h">ClassHeader.h</ProjectItem>
+    <ProjectItem ReplaceParameters="true" TargetFileName="$safeitemname$.cpp">ClassSource.cpp</ProjectItem>
+  </TemplateContent>
+</VSTemplate>

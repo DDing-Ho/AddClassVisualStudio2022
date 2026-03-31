@@ -1,0 +1,22 @@
+﻿# Visual Studio
+.vs/
+**/.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build output
+**/bin/
+**/obj/
+
+# Local SDK/runtime cache
+**/.dotnet/
+
+# Logs and diagnostics
+*.log
+*.cache
+
+# OS files
+Thumbs.db
+Desktop.ini

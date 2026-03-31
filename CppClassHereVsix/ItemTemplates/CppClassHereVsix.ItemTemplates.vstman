@@ -1,0 +1,21 @@
+﻿<VSTemplateManifest Version="1.0" xmlns="http://schemas.microsoft.com/developer/vstemplatemanifest/2015">
+  <VSTemplateContainer TemplateType="Item" Locale="1033">
+    <RelativePathOnDisk>VC\Code\1033\CppClassPair</RelativePathOnDisk>
+    <TemplateFileName>CppClassPair.vstemplate</TemplateFileName>
+    <VSTemplateHeader>
+      <TemplateData xmlns="http://schemas.microsoft.com/developer/vstemplate/2005">
+        <Name>C++ Class Pair</Name>
+        <Description>Creates a matching .h and .cpp pair with a minimal C++ class skeleton.</Description>
+        <TemplateID>CppClassHereVsix.CppClassPair</TemplateID>
+        <ProjectType>VC</ProjectType>
+        <TemplateGroupID>VC-Native</TemplateGroupID>
+        <AppliesTo>VC</AppliesTo>
+        <SortOrder>5</SortOrder>
+        <DefaultName>Class</DefaultName>
+        <ProvideDefaultName>true</ProvideDefaultName>
+        <LocationField>Enabled</LocationField>
+        <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
+      </TemplateData>
+    </VSTemplateHeader>
+  </VSTemplateContainer>
+</VSTemplateManifest>

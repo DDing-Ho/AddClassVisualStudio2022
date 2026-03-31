@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VsixLanguagePack Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema-lp/2010">
+  <LocalizedName>Add C++ Class Here</LocalizedName>
+  <LocalizedDescription>Creates folder-aware .h and .cpp files for the selected vcxproj folder or VC filter and adds them to the project immediately.</LocalizedDescription>
+</VsixLanguagePack>

@@ -1,0 +1,5 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VsixLanguagePack Version="1.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema-lp/2010">
+  <LocalizedName>여기에 C++ 클래스 추가</LocalizedName>
+  <LocalizedDescription>선택한 vcxproj 폴더나 VC 필터 기준으로 .h와 .cpp 파일을 만들고 프로젝트에 바로 추가합니다.</LocalizedDescription>
+</VsixLanguagePack>
