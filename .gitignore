@@ -20,3 +20,7 @@
 # OS files
 Thumbs.db
 Desktop.ini
+
+# Shared troubleshooting logs
+Log/
+
