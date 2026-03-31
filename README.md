@@ -19,9 +19,23 @@
 - `CppClassHereVsix.sln`: 솔루션 파일
 - `CppClassHereVsix/`: VSIX 프로젝트 소스
 - `CppClassHereVsix/ScreenShot/`: UI 비교용 참고 스크린샷
+- `Installer/`: 빌드 없이 바로 설치할 수 있는 VSIX 파일
+
+## 바로 설치
+
+Visual Studio SDK 없이 확장만 설치하려면 아래 파일을 바로 실행하면 된다.
+
+- `Installer\CppClassHereVsix-1.3.2.vsix`
+
+설치 방법:
+
+1. Visual Studio 2022를 종료한다.
+2. `Installer\CppClassHereVsix-1.3.2.vsix`를 실행한다.
+3. 설치가 끝나면 Visual Studio를 다시 실행한다.
 
 ## 빌드
 
+소스를 직접 수정하거나 새 버전을 빌드하려면 Visual Studio 2022 SDK가 필요하다.
 설치된 Visual Studio 2022의 MSBuild로 빌드한다.
 
 ```powershell
@@ -32,13 +46,6 @@
 
 - `CppClassHereVsix\bin\Release\CppClassHereVsix.vsix`
 - `CppClassHereVsix\bin\Release\CppClassHereVsix-1.3.2.vsix`
-
-## 설치
-
-1. Visual Studio를 종료한다.
-2. `Release` 구성으로 빌드한다.
-3. 생성된 `.vsix` 파일을 설치한다.
-4. Visual Studio를 다시 실행한다.
 
 ## 사용 방법
 
@@ -51,14 +58,14 @@
 
 현재 릴리스 패키지:
 
-- `CppClassHereVsix\bin\Release\CppClassHereVsix-1.3.2.vsix`
+- `Installer\CppClassHereVsix-1.3.2.vsix`
 
 권장 릴리스 절차:
 
 1. `Release`로 빌드한다.
 2. 생성된 VSIX가 Visual Studio 2022에서 정상 설치되는지 확인한다.
 3. 릴리스 버전에 맞는 태그를 만든다.
-4. `.vsix` 파일을 Git 호스팅 서비스의 Release 또는 내부 배포 채널에 업로드한다.
+4. `Installer` 폴더의 `.vsix` 파일을 Git 호스팅 서비스의 Release 또는 내부 배포 채널에 업로드한다.
 
 ## Git 정보
 

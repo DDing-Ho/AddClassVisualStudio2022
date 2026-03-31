@@ -11,8 +11,15 @@
 - 프로젝트 루트: 프로젝트 기준 위치에 파일 생성
 - 지원하지 않는 선택 상태: 명령이 동작하지 않음
 
+## 설치용 파일
+
+빌드 없이 바로 설치하려면 루트의 아래 파일을 사용한다.
+
+- `..\Installer\CppClassHereVsix-1.3.2.vsix`
+
 ## 빌드
 
+소스를 직접 수정하거나 새 버전을 빌드하려면 Visual Studio 2022 SDK가 필요하다.
 설치된 Visual Studio 2022의 MSBuild로 빌드한다.
 
 ```powershell
@@ -22,12 +29,6 @@
 출력 VSIX:
 
 - `CppClassHereVsix\bin\Release\CppClassHereVsix.vsix`
-
-## 설치
-
-1. `Release`로 빌드한다.
-2. 생성된 `.vsix` 파일을 설치한다.
-3. Visual Studio를 다시 실행한다.
 
 ## 사용 방법
 

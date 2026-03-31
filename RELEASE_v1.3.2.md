@@ -15,17 +15,19 @@
 
 ## 릴리스 자산
 
-- `CppClassHereVsix-1.3.2.vsix`
+- `Installer\CppClassHereVsix-1.3.2.vsix`
 
 ## 설치 방법
 
 1. Visual Studio 2022를 종료한다.
-2. 이 릴리스에서 `CppClassHereVsix-1.3.2.vsix`를 다운로드한다.
+2. 저장소 또는 릴리스 자산에서 `CppClassHereVsix-1.3.2.vsix`를 받는다.
 3. `.vsix` 설치 파일을 실행한다.
 4. Visual Studio를 다시 실행한다.
 
 ## 참고
 
+- 빌드 없이 설치 가능
+- 소스 빌드에는 Visual Studio 2022 SDK 필요
 - 대상 버전: Visual Studio 2022
 - 대상 프로젝트 형식: `vcxproj`
 - 지원 UI 언어: 한국어, 영어
