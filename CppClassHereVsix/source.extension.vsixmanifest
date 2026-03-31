@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Id="CppClassHereVsix.e76e6e5f-7e5d-4ea5-ba0a-218e2fcbb596" Version="1.3.3" Language="en-US" Publisher="DDingHo" />
+    <Identity Id="CppClassHereVsix.e76e6e5f-7e5d-4ea5-ba0a-218e2fcbb596" Version="1.3.4" Language="en-US" Publisher="DDingHo" />
     <DisplayName>Add C++ Class Here</DisplayName>
     <Description xml:space="preserve">Creates folder-aware .h and .cpp files for the selected vcxproj folder or VC filter and adds them to the project immediately.</Description>
   </Metadata>
@@ -31,6 +31,7 @@
     <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
   </Assets>
 </PackageManifest>
+
 
 
 
