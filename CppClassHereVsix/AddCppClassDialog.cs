@@ -39,6 +39,7 @@ namespace CppClassHereVsix
         private readonly Button okButton;
         private readonly Button cancelButton;
         private readonly ThemeChangedEventHandler themeChangedHandler;
+        private readonly bool hasExplicitInitialDpi;
         private ThemePalette palette;
         private bool updatingControls;
         private bool isFileNameSynced;
@@ -53,17 +54,18 @@ namespace CppClassHereVsix
         [DllImport("user32.dll")]
         private static extern uint GetDpiForWindow(IntPtr hwnd);
 
-        private AddCppClassDialog(string targetFolder, int initialDpi)
+        private AddCppClassDialog(string targetFolder, int initialDpi, bool hasExplicitInitialDpi)
         {
             this.targetFolder = targetFolder;
             themeChangedHandler = e => ApplyThemeSafe();
+            this.hasExplicitInitialDpi = hasExplicitInitialDpi;
             currentDpi = NormalizeDpi(initialDpi);
 
             AutoScaleMode = AutoScaleMode.None;
             Font = SystemFonts.MessageBoxFont;
             Text = LocalizedStrings.DialogWindowTitle;
             FormBorderStyle = FormBorderStyle.None;
-            StartPosition = FormStartPosition.CenterParent;
+            StartPosition = FormStartPosition.CenterScreen;
             MinimizeBox = false;
             MaximizeBox = false;
             ShowInTaskbar = false;
@@ -176,7 +178,31 @@ namespace CppClassHereVsix
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
-            ApplyScaledLayout(GetCurrentWindowDpi());
+
+            if (!hasExplicitInitialDpi)
+            {
+                ApplyScaledLayout(GetCurrentWindowDpi());
+            }
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+
+            int actualDpi = GetCurrentWindowDpi();
+            if (actualDpi != currentDpi)
+            {
+                ApplyScaledLayout(actualDpi);
+
+                if (Owner != null && StartPosition == FormStartPosition.CenterParent)
+                {
+                    CenterToParent();
+                }
+                else if (StartPosition == FormStartPosition.CenterScreen)
+                {
+                    CenterToScreen();
+                }
+            }
         }
 
         protected override void WndProc(ref Message m)
@@ -224,8 +250,14 @@ namespace CppClassHereVsix
 
         public static AddCppClassDialogResult ShowDialog(string targetFolder, IWin32Window owner = null, int initialDpi = BaseDpi)
         {
-            using (AddCppClassDialog dialog = new AddCppClassDialog(targetFolder, initialDpi))
+            bool hasExplicitInitialDpi = owner != null && initialDpi > 0;
+
+            using (AddCppClassDialog dialog = new AddCppClassDialog(targetFolder, initialDpi, hasExplicitInitialDpi))
             {
+                dialog.StartPosition = owner == null
+                    ? FormStartPosition.CenterScreen
+                    : FormStartPosition.CenterParent;
+
                 DialogResult result = owner == null
                     ? dialog.ShowDialog()
                     : dialog.ShowDialog(owner);
