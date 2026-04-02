@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.Design;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
@@ -24,6 +25,12 @@ namespace CppClassHereVsix
 
         [DllImport("user32.dll")]
         private static extern uint GetDpiForWindow(IntPtr hwnd);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        private static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint processId);
 
         private AddCppClassHereCommand(Package package, OleMenuCommandService commandService)
         {
@@ -255,6 +262,12 @@ namespace CppClassHereVsix
 
         private static int GetInitialDialogDpi(IntPtr windowHandle)
         {
+            IntPtr dpiAnchorWindow = GetDpiAnchorWindow(windowHandle);
+            if (dpiAnchorWindow != IntPtr.Zero)
+            {
+                windowHandle = dpiAnchorWindow;
+            }
+
             if (windowHandle != IntPtr.Zero)
             {
                 try
@@ -281,6 +294,23 @@ namespace CppClassHereVsix
             }
 
             return 96;
+        }
+
+        private static IntPtr GetDpiAnchorWindow(IntPtr ownerWindowHandle)
+        {
+            IntPtr foregroundWindow = GetForegroundWindow();
+            if (foregroundWindow == IntPtr.Zero)
+            {
+                return ownerWindowHandle;
+            }
+
+            GetWindowThreadProcessId(foregroundWindow, out uint processId);
+            if (processId != (uint)Process.GetCurrentProcess().Id)
+            {
+                return ownerWindowHandle;
+            }
+
+            return foregroundWindow;
         }
 
         private static int NormalizeDpi(int dpi)

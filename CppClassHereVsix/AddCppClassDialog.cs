@@ -15,6 +15,16 @@ namespace CppClassHereVsix
         private const int LogicalDialogHeight = 440;
         private const int LogicalBorderPadding = 1;
         private const int LogicalDragRegionHeight = 80;
+        private const int LogicalTextBoxHeight = 23;
+        private const int LogicalBrowseButtonWidth = 28;
+        private const int LogicalComboBoxHeight = 24;
+        private const int LogicalCheckBoxWidth = 120;
+        private const int LogicalCheckBoxHeight = 24;
+        private const int LogicalActionButtonWidth = 76;
+        private const int LogicalActionButtonHeight = 24;
+        private const int LogicalActionButtonTextPadding = 16;
+        private const int LogicalCheckBoxTextPadding = 24;
+        private const float LogicalTitleFontSize = 18f;
         private const int WmNclButtonDown = 0xA1;
         private const int WmDpiChanged = 0x02E0;
         private const int HtCaption = 0x2;
@@ -40,6 +50,8 @@ namespace CppClassHereVsix
         private readonly Button cancelButton;
         private readonly ThemeChangedEventHandler themeChangedHandler;
         private readonly bool hasExplicitInitialDpi;
+        private Font scaledDialogFont;
+        private Font scaledTitleFont;
         private ThemePalette palette;
         private bool updatingControls;
         private bool isFileNameSynced;
@@ -192,16 +204,7 @@ namespace CppClassHereVsix
             int actualDpi = GetCurrentWindowDpi();
             if (actualDpi != currentDpi)
             {
-                ApplyScaledLayout(actualDpi);
-
-                if (Owner != null && StartPosition == FormStartPosition.CenterParent)
-                {
-                    CenterToParent();
-                }
-                else if (StartPosition == FormStartPosition.CenterScreen)
-                {
-                    CenterToScreen();
-                }
+                ApplyScaledLayout(actualDpi, GetCenteredBoundsForDpi(actualDpi));
             }
         }
 
@@ -281,6 +284,7 @@ namespace CppClassHereVsix
             SuspendLayout();
             try
             {
+                UpdateScaledFonts();
                 Padding = new Padding(ScaleLogical(LogicalBorderPadding));
 
                 if (suggestedBounds.HasValue)
@@ -301,9 +305,9 @@ namespace CppClassHereVsix
                 accessCaptionLabel.Location = new Point(ScaleLogical(211), ScaleLogical(174));
                 otherOptionsLabel.Location = new Point(ScaleLogical(24), ScaleLogical(240));
 
-                int textBoxHeight = Math.Max(classNameTextBox.PreferredHeight, ScaleLogical(23));
-                int comboBoxHeight = Math.Max(inheritanceAccessComboBox.PreferredHeight, ScaleLogical(24));
-                int browseButtonWidth = ScaleLogical(28);
+                int textBoxHeight = Math.Max(classNameTextBox.PreferredHeight, ScaleLogical(LogicalTextBoxHeight));
+                int comboBoxHeight = Math.Max(inheritanceAccessComboBox.PreferredHeight, ScaleLogical(LogicalComboBoxHeight));
+                int browseButtonWidth = ScaleLogical(LogicalBrowseButtonWidth);
 
                 classNameTextBox.SetBounds(ScaleLogical(24), ScaleLogical(127), ScaleLogical(176), textBoxHeight);
                 headerFileTextBox.SetBounds(ScaleLogical(211), ScaleLogical(127), ScaleLogical(148), textBoxHeight);
@@ -314,17 +318,16 @@ namespace CppClassHereVsix
                 baseClassTextBox.SetBounds(ScaleLogical(24), ScaleLogical(192), ScaleLogical(176), textBoxHeight);
                 inheritanceAccessComboBox.SetBounds(ScaleLogical(211), ScaleLogical(192), ScaleLogical(176), comboBoxHeight);
 
-                Size checkBoxSize = inlineCheckBox.GetPreferredSize(Size.Empty);
                 inlineCheckBox.SetBounds(
                     ScaleLogical(35),
                     ScaleLogical(260),
-                    Math.Max(checkBoxSize.Width, ScaleLogical(120)),
-                    Math.Max(checkBoxSize.Height, ScaleLogical(24)));
+                    GetMinimumControlWidth(inlineCheckBox, LogicalCheckBoxWidth, LogicalCheckBoxTextPadding),
+                    Math.Max(inlineCheckBox.PreferredSize.Height, ScaleLogical(LogicalCheckBoxHeight)));
 
-                int actionButtonHeight = GetActionButtonHeight(okButton, cancelButton);
-                int okButtonWidth = GetActionButtonWidth(okButton);
-                int cancelButtonWidth = GetActionButtonWidth(cancelButton);
-                int buttonsTop = ClientSize.Height - ScaleLogical(24) - actionButtonHeight;
+                int actionButtonHeight = Math.Max(okButton.PreferredSize.Height, Math.Max(cancelButton.PreferredSize.Height, ScaleLogical(LogicalActionButtonHeight)));
+                int okButtonWidth = GetMinimumControlWidth(okButton, LogicalActionButtonWidth, LogicalActionButtonTextPadding);
+                int cancelButtonWidth = GetMinimumControlWidth(cancelButton, LogicalActionButtonWidth, LogicalActionButtonTextPadding);
+                int buttonsTop = ClientSize.Height - ScaleLogical(LogicalActionButtonHeight) - actionButtonHeight;
                 int cancelButtonLeft = ClientSize.Width - ScaleLogical(19) - cancelButtonWidth;
                 int okButtonLeft = cancelButtonLeft - ScaleLogical(5) - okButtonWidth;
 
@@ -337,6 +340,24 @@ namespace CppClassHereVsix
             }
 
             Invalidate();
+        }
+
+        private void UpdateScaledFonts()
+        {
+            Font nextDialogFont = CreateScaledFont(SystemFonts.MessageBoxFont, currentDpi);
+            Font nextTitleFont = CreateScaledFont(SystemFonts.MessageBoxFont.FontFamily, LogicalTitleFontSize, FontStyle.Regular, currentDpi);
+
+            Font previousDialogFont = scaledDialogFont;
+            Font previousTitleFont = scaledTitleFont;
+
+            scaledDialogFont = nextDialogFont;
+            scaledTitleFont = nextTitleFont;
+
+            Font = scaledDialogFont;
+            titleLabel.Font = scaledTitleFont;
+
+            previousDialogFont?.Dispose();
+            previousTitleFont?.Dispose();
         }
 
         private static Control FindFocusedControl(Control parent)
@@ -399,6 +420,18 @@ namespace CppClassHereVsix
             return dpi > 0 ? dpi : BaseDpi;
         }
 
+        private Rectangle GetCenteredBoundsForDpi(int dpi)
+        {
+            Size scaledSize = new Size(ScaleLogical(LogicalDialogWidth, dpi), ScaleLogical(LogicalDialogHeight, dpi));
+            Rectangle currentBounds = Bounds;
+
+            return new Rectangle(
+                currentBounds.Left + ((currentBounds.Width - scaledSize.Width) / 2),
+                currentBounds.Top + ((currentBounds.Height - scaledSize.Height) / 2),
+                scaledSize.Width,
+                scaledSize.Height);
+        }
+
         private int GetCurrentWindowDpi()
         {
             try
@@ -431,6 +464,23 @@ namespace CppClassHereVsix
         private static int ExtractDpi(IntPtr wParam)
         {
             return NormalizeDpi((int)(wParam.ToInt64() & 0xFFFF));
+        }
+
+        private static Font CreateScaledFont(Font template, int dpi)
+        {
+            return CreateScaledFont(template.FontFamily, template.SizeInPoints, template.Style, dpi);
+        }
+
+        private static Font CreateScaledFont(FontFamily family, float basePointSize, FontStyle style, int dpi)
+        {
+            float scaledPointSize = basePointSize * NormalizeDpi(dpi) / BaseDpi;
+            return new Font(family, scaledPointSize, style, GraphicsUnit.Point);
+        }
+
+        private int GetMinimumControlWidth(Control control, int logicalMinimumWidth, int logicalTextPadding)
+        {
+            Size textSize = TextRenderer.MeasureText(control.Text, control.Font);
+            return Math.Max(ScaleLogical(logicalMinimumWidth), textSize.Width + ScaleLogical(logicalTextPadding));
         }
 
         private static Rectangle? TryGetSuggestedBounds(IntPtr lParam)
@@ -470,24 +520,6 @@ namespace CppClassHereVsix
                 BorderStyle = BorderStyle.FixedSingle,
                 TabIndex = tabIndex
             };
-        }
-
-        private int GetActionButtonWidth(Button button)
-        {
-            Size preferredSize = button.GetPreferredSize(Size.Empty);
-            return Math.Max(ScaleLogical(76), preferredSize.Width + ScaleLogical(16));
-        }
-
-        private int GetActionButtonHeight(params Button[] buttons)
-        {
-            int preferredHeight = ScaleLogical(24);
-
-            foreach (Button button in buttons)
-            {
-                preferredHeight = Math.Max(preferredHeight, button.GetPreferredSize(Size.Empty).Height + ScaleLogical(6));
-            }
-
-            return preferredHeight;
         }
 
         private Button CreateBrowseButton(int x, int y, EventHandler clickHandler)
@@ -762,6 +794,10 @@ namespace CppClassHereVsix
         private void OnDialogClosed(object sender, FormClosedEventArgs e)
         {
             VSColorTheme.ThemeChanged -= themeChangedHandler;
+            scaledDialogFont?.Dispose();
+            scaledDialogFont = null;
+            scaledTitleFont?.Dispose();
+            scaledTitleFont = null;
         }
 
         private static Color AdjustColor(Color color, float delta)
@@ -779,6 +815,16 @@ namespace CppClassHereVsix
                 ? channel + ((255 - channel) * delta)
                 : channel * (1f + delta);
             return Math.Max(0, Math.Min(255, (int)Math.Round(adjusted)));
+        }
+
+        private int ScaleLogical(int logicalPixels, int dpi)
+        {
+            if (logicalPixels <= 0)
+            {
+                return logicalPixels;
+            }
+
+            return Math.Max(1, (int)Math.Round((logicalPixels * NormalizeDpi(dpi)) / (double)BaseDpi, MidpointRounding.AwayFromZero));
         }
 
         [StructLayout(LayoutKind.Sequential)]
