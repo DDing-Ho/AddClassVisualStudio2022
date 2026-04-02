@@ -10,13 +10,23 @@ namespace CppClassHereVsix
 {
     internal sealed class AddCppClassDialog : Form
     {
-        private const int DragRegionHeight = 80;
+        private const int BaseDpi = 96;
+        private const int LogicalDialogWidth = 598;
+        private const int LogicalDialogHeight = 440;
+        private const int LogicalBorderPadding = 1;
+        private const int LogicalDragRegionHeight = 80;
         private const int WmNclButtonDown = 0xA1;
+        private const int WmDpiChanged = 0x02E0;
         private const int HtCaption = 0x2;
 
         private readonly string targetFolder;
         private readonly Label titleLabel;
+        private readonly Label classNameCaptionLabel;
+        private readonly Label headerFileCaptionLabel;
         private readonly Label sourceFileCaptionLabel;
+        private readonly Label baseClassCaptionLabel;
+        private readonly Label accessCaptionLabel;
+        private readonly Label otherOptionsLabel;
         private readonly List<Label> captionLabels = new List<Label>();
         private readonly TextBox classNameTextBox;
         private readonly TextBox headerFileTextBox;
@@ -32,6 +42,7 @@ namespace CppClassHereVsix
         private ThemePalette palette;
         private bool updatingControls;
         private bool isFileNameSynced;
+        private int currentDpi;
 
         [DllImport("user32.dll")]
         private static extern bool ReleaseCapture();
@@ -39,21 +50,25 @@ namespace CppClassHereVsix
         [DllImport("user32.dll")]
         private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
 
-        private AddCppClassDialog(string targetFolder)
+        [DllImport("user32.dll")]
+        private static extern uint GetDpiForWindow(IntPtr hwnd);
+
+        private AddCppClassDialog(string targetFolder, int initialDpi)
         {
             this.targetFolder = targetFolder;
             themeChangedHandler = e => ApplyThemeSafe();
+            currentDpi = NormalizeDpi(initialDpi);
 
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleMode = AutoScaleMode.None;
             Font = SystemFonts.MessageBoxFont;
             Text = LocalizedStrings.DialogWindowTitle;
             FormBorderStyle = FormBorderStyle.None;
-            StartPosition = FormStartPosition.CenterScreen;
+            StartPosition = FormStartPosition.CenterParent;
             MinimizeBox = false;
             MaximizeBox = false;
             ShowInTaskbar = false;
-            ClientSize = new Size(598, 440);
-            Padding = new Padding(1);
+            ClientSize = new Size(LogicalDialogWidth, LogicalDialogHeight);
+            Padding = new Padding(LogicalBorderPadding);
             DoubleBuffered = true;
             MouseDown += OnChromeMouseDown;
             Paint += OnDialogPaint;
@@ -73,8 +88,8 @@ namespace CppClassHereVsix
             titleLabel.MouseDown += OnChromeMouseDown;
             Controls.Add(titleLabel);
 
-            CreateCaption(LocalizedStrings.ClassNameLabel, 24, 108);
-            CreateCaption(LocalizedStrings.HeaderFileLabel, 211, 108);
+            classNameCaptionLabel = CreateCaption(LocalizedStrings.ClassNameLabel, 24, 108);
+            headerFileCaptionLabel = CreateCaption(LocalizedStrings.HeaderFileLabel, 211, 108);
             sourceFileCaptionLabel = CreateCaption(LocalizedStrings.SourceFileLabel, 399, 108);
 
             classNameTextBox = CreateTextBox(24, 127, 176, 0);
@@ -95,8 +110,8 @@ namespace CppClassHereVsix
             sourceBrowseButton = CreateBrowseButton(550, 127, OnBrowseSourceFile);
             Controls.Add(sourceBrowseButton);
 
-            CreateCaption(LocalizedStrings.BaseClassLabel, 24, 174);
-            CreateCaption(LocalizedStrings.AccessLabel, 211, 174);
+            baseClassCaptionLabel = CreateCaption(LocalizedStrings.BaseClassLabel, 24, 174);
+            accessCaptionLabel = CreateCaption(LocalizedStrings.AccessLabel, 211, 174);
 
             baseClassTextBox = CreateTextBox(24, 192, 176, 3);
             Controls.Add(baseClassTextBox);
@@ -120,7 +135,7 @@ namespace CppClassHereVsix
             inheritanceAccessComboBox.SelectedIndex = 0;
             Controls.Add(inheritanceAccessComboBox);
 
-            Label otherOptionsLabel = CreateCaption(LocalizedStrings.OtherOptionsLabel, 24, 240);
+            otherOptionsLabel = CreateCaption(LocalizedStrings.OtherOptionsLabel, 24, 240);
             otherOptionsLabel.TabStop = false;
 
             inlineCheckBox = new CheckBox
@@ -149,12 +164,31 @@ namespace CppClassHereVsix
             AcceptButton = okButton;
             CancelButton = cancelButton;
 
+            ApplyScaledLayout(currentDpi);
             isFileNameSynced = true;
             SyncFileNames();
             ApplyTheme();
             ApplyInlineState();
             ActiveControl = classNameTextBox;
             VSColorTheme.ThemeChanged += themeChangedHandler;
+        }
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            ApplyScaledLayout(GetCurrentWindowDpi());
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == WmDpiChanged)
+            {
+                Rectangle? suggestedBounds = TryGetSuggestedBounds(m.LParam);
+                ApplyScaledLayout(ExtractDpi(m.WParam), suggestedBounds);
+                return;
+            }
+
+            base.WndProc(ref m);
         }
 
         protected override bool ProcessTabKey(bool forward)
@@ -188,11 +222,15 @@ namespace CppClassHereVsix
 
         public bool IsInline => inlineCheckBox.Checked;
 
-        public static AddCppClassDialogResult ShowDialog(string targetFolder)
+        public static AddCppClassDialogResult ShowDialog(string targetFolder, IWin32Window owner = null, int initialDpi = BaseDpi)
         {
-            using (AddCppClassDialog dialog = new AddCppClassDialog(targetFolder))
+            using (AddCppClassDialog dialog = new AddCppClassDialog(targetFolder, initialDpi))
             {
-                return dialog.ShowDialog() == DialogResult.OK
+                DialogResult result = owner == null
+                    ? dialog.ShowDialog()
+                    : dialog.ShowDialog(owner);
+
+                return result == DialogResult.OK
                     ? new AddCppClassDialogResult(
                         dialog.ClassName,
                         dialog.HeaderFileName,
@@ -202,6 +240,71 @@ namespace CppClassHereVsix
                         dialog.IsInline)
                     : null;
             }
+        }
+
+        private void ApplyScaledLayout(int dpi, Rectangle? suggestedBounds = null)
+        {
+            currentDpi = NormalizeDpi(dpi);
+
+            SuspendLayout();
+            try
+            {
+                Padding = new Padding(ScaleLogical(LogicalBorderPadding));
+
+                if (suggestedBounds.HasValue)
+                {
+                    Bounds = suggestedBounds.Value;
+                }
+                else
+                {
+                    ClientSize = new Size(ScaleLogical(LogicalDialogWidth), ScaleLogical(LogicalDialogHeight));
+                }
+
+                titleLabel.Location = new Point(ScaleLogical(23), ScaleLogical(34));
+
+                classNameCaptionLabel.Location = new Point(ScaleLogical(24), ScaleLogical(108));
+                headerFileCaptionLabel.Location = new Point(ScaleLogical(211), ScaleLogical(108));
+                sourceFileCaptionLabel.Location = new Point(ScaleLogical(399), ScaleLogical(108));
+                baseClassCaptionLabel.Location = new Point(ScaleLogical(24), ScaleLogical(174));
+                accessCaptionLabel.Location = new Point(ScaleLogical(211), ScaleLogical(174));
+                otherOptionsLabel.Location = new Point(ScaleLogical(24), ScaleLogical(240));
+
+                int textBoxHeight = Math.Max(classNameTextBox.PreferredHeight, ScaleLogical(23));
+                int comboBoxHeight = Math.Max(inheritanceAccessComboBox.PreferredHeight, ScaleLogical(24));
+                int browseButtonWidth = ScaleLogical(28);
+
+                classNameTextBox.SetBounds(ScaleLogical(24), ScaleLogical(127), ScaleLogical(176), textBoxHeight);
+                headerFileTextBox.SetBounds(ScaleLogical(211), ScaleLogical(127), ScaleLogical(148), textBoxHeight);
+                headerBrowseButton.SetBounds(ScaleLogical(362), ScaleLogical(127), browseButtonWidth, textBoxHeight);
+                sourceFileTextBox.SetBounds(ScaleLogical(399), ScaleLogical(127), ScaleLogical(148), textBoxHeight);
+                sourceBrowseButton.SetBounds(ScaleLogical(550), ScaleLogical(127), browseButtonWidth, textBoxHeight);
+
+                baseClassTextBox.SetBounds(ScaleLogical(24), ScaleLogical(192), ScaleLogical(176), textBoxHeight);
+                inheritanceAccessComboBox.SetBounds(ScaleLogical(211), ScaleLogical(192), ScaleLogical(176), comboBoxHeight);
+
+                Size checkBoxSize = inlineCheckBox.GetPreferredSize(Size.Empty);
+                inlineCheckBox.SetBounds(
+                    ScaleLogical(35),
+                    ScaleLogical(260),
+                    Math.Max(checkBoxSize.Width, ScaleLogical(120)),
+                    Math.Max(checkBoxSize.Height, ScaleLogical(24)));
+
+                int actionButtonHeight = GetActionButtonHeight(okButton, cancelButton);
+                int okButtonWidth = GetActionButtonWidth(okButton);
+                int cancelButtonWidth = GetActionButtonWidth(cancelButton);
+                int buttonsTop = ClientSize.Height - ScaleLogical(24) - actionButtonHeight;
+                int cancelButtonLeft = ClientSize.Width - ScaleLogical(19) - cancelButtonWidth;
+                int okButtonLeft = cancelButtonLeft - ScaleLogical(5) - okButtonWidth;
+
+                okButton.SetBounds(okButtonLeft, buttonsTop, okButtonWidth, actionButtonHeight);
+                cancelButton.SetBounds(cancelButtonLeft, buttonsTop, cancelButtonWidth, actionButtonHeight);
+            }
+            finally
+            {
+                ResumeLayout(true);
+            }
+
+            Invalidate();
         }
 
         private static Control FindFocusedControl(Control parent)
@@ -249,6 +352,66 @@ namespace CppClassHereVsix
             return -1;
         }
 
+        private int ScaleLogical(int logicalPixels)
+        {
+            if (logicalPixels <= 0)
+            {
+                return logicalPixels;
+            }
+
+            return Math.Max(1, (int)Math.Round((logicalPixels * currentDpi) / (double)BaseDpi, MidpointRounding.AwayFromZero));
+        }
+
+        private static int NormalizeDpi(int dpi)
+        {
+            return dpi > 0 ? dpi : BaseDpi;
+        }
+
+        private int GetCurrentWindowDpi()
+        {
+            try
+            {
+                if (IsHandleCreated)
+                {
+                    return NormalizeDpi((int)GetDpiForWindow(Handle));
+                }
+            }
+            catch (EntryPointNotFoundException)
+            {
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                using (Graphics graphics = CreateGraphics())
+                {
+                    return NormalizeDpi((int)Math.Round(graphics.DpiX));
+                }
+            }
+            catch
+            {
+                return currentDpi;
+            }
+        }
+
+        private static int ExtractDpi(IntPtr wParam)
+        {
+            return NormalizeDpi((int)(wParam.ToInt64() & 0xFFFF));
+        }
+
+        private static Rectangle? TryGetSuggestedBounds(IntPtr lParam)
+        {
+            if (lParam == IntPtr.Zero)
+            {
+                return null;
+            }
+
+            NativeRect nativeRect = Marshal.PtrToStructure<NativeRect>(lParam);
+            return nativeRect.ToRectangle();
+        }
+
         private Label CreateCaption(string text, int x, int y)
         {
             Label label = new Label
@@ -275,6 +438,24 @@ namespace CppClassHereVsix
                 BorderStyle = BorderStyle.FixedSingle,
                 TabIndex = tabIndex
             };
+        }
+
+        private int GetActionButtonWidth(Button button)
+        {
+            Size preferredSize = button.GetPreferredSize(Size.Empty);
+            return Math.Max(ScaleLogical(76), preferredSize.Width + ScaleLogical(16));
+        }
+
+        private int GetActionButtonHeight(params Button[] buttons)
+        {
+            int preferredHeight = ScaleLogical(24);
+
+            foreach (Button button in buttons)
+            {
+                preferredHeight = Math.Max(preferredHeight, button.GetPreferredSize(Size.Empty).Height + ScaleLogical(6));
+            }
+
+            return preferredHeight;
         }
 
         private Button CreateBrowseButton(int x, int y, EventHandler clickHandler)
@@ -537,7 +718,7 @@ namespace CppClassHereVsix
                 return;
             }
 
-            if (sender == this && e.Y > DragRegionHeight)
+            if (sender == this && e.Y > ScaleLogical(LogicalDragRegionHeight))
             {
                 return;
             }
@@ -566,6 +747,20 @@ namespace CppClassHereVsix
                 ? channel + ((255 - channel) * delta)
                 : channel * (1f + delta);
             return Math.Max(0, Math.Min(255, (int)Math.Round(adjusted)));
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct NativeRect
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
+
+            public Rectangle ToRectangle()
+            {
+                return Rectangle.FromLTRB(Left, Top, Right, Bottom);
+            }
         }
 
         private sealed class ThemePalette

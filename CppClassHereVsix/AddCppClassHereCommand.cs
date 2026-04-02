@@ -1,7 +1,9 @@
 ﻿using System;
 using System.ComponentModel.Design;
+using System.Drawing;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -19,6 +21,9 @@ namespace CppClassHereVsix
         private static readonly Regex ValidClassNamePattern = new Regex("^[A-Za-z_][A-Za-z0-9_]*$", RegexOptions.Compiled);
 
         private readonly Package package;
+
+        [DllImport("user32.dll")]
+        private static extern uint GetDpiForWindow(IntPtr hwnd);
 
         private AddCppClassHereCommand(Package package, OleMenuCommandService commandService)
         {
@@ -81,7 +86,11 @@ namespace CppClassHereVsix
                     return;
                 }
 
-                AddCppClassDialogResult dialogResult = AddCppClassDialog.ShowDialog(context.DefaultLocation);
+                IntPtr dialogOwnerHwnd = GetDialogOwnerHwnd((IServiceProvider)package);
+                AddCppClassDialogResult dialogResult = AddCppClassDialog.ShowDialog(
+                    context.DefaultLocation,
+                    dialogOwnerHwnd == IntPtr.Zero ? null : new WindowHandleWrapper(dialogOwnerHwnd),
+                    GetInitialDialogDpi(dialogOwnerHwnd));
                 AppendLog("Prompt result='" + (dialogResult?.ClassName ?? "<cancel>") + "', inline=" + dialogResult?.IsInline);
                 if (dialogResult == null)
                 {
@@ -228,6 +237,65 @@ namespace CppClassHereVsix
             catch
             {
             }
+        }
+
+        private static IntPtr GetDialogOwnerHwnd(IServiceProvider serviceProvider)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            IVsUIShell uiShell = serviceProvider.GetService(typeof(SVsUIShell)) as IVsUIShell;
+            if (uiShell == null)
+            {
+                return IntPtr.Zero;
+            }
+
+            uiShell.GetDialogOwnerHwnd(out IntPtr dialogOwnerHwnd);
+            return dialogOwnerHwnd;
+        }
+
+        private static int GetInitialDialogDpi(IntPtr windowHandle)
+        {
+            if (windowHandle != IntPtr.Zero)
+            {
+                try
+                {
+                    return NormalizeDpi((int)GetDpiForWindow(windowHandle));
+                }
+                catch (EntryPointNotFoundException)
+                {
+                }
+                catch
+                {
+                }
+
+                try
+                {
+                    using (Graphics graphics = Graphics.FromHwnd(windowHandle))
+                    {
+                        return NormalizeDpi((int)Math.Round(graphics.DpiX));
+                    }
+                }
+                catch
+                {
+                }
+            }
+
+            return 96;
+        }
+
+        private static int NormalizeDpi(int dpi)
+        {
+            return dpi > 0 ? dpi : 96;
+        }
+
+        private sealed class WindowHandleWrapper : IWin32Window
+        {
+            public WindowHandleWrapper(IntPtr handle)
+            {
+                Handle = handle;
+            }
+
+            public IntPtr Handle { get; }
         }
     }
 }
